@@ -4,7 +4,7 @@ from torch.nn import init
 import functools
 from torch.autograd import Variable
 import numpy as np
-from modules import ResnetBlock, CondInstanceNorm, TwoInputSequential, CINResnetBlock, InstanceNorm2d
+from .modules import ResnetBlock, CondInstanceNorm, TwoInputSequential, CINResnetBlock, InstanceNorm2d
 from torch.optim import lr_scheduler
 
 ###############################################################################
