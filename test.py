@@ -4,7 +4,7 @@ from data import CreateDataLoader
 from models import create_model
 from util.visualizer import Visualizer
 from util import html
-
+import numpy as np
 
 if __name__ == '__main__':
     opt = TestOptions().parse()
@@ -21,14 +21,20 @@ if __name__ == '__main__':
     web_dir = os.path.join(opt.results_dir, opt.name, '%s_%s' % (opt.phase, opt.which_epoch))
     webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s' % (opt.name, opt.phase, opt.which_epoch))
     # test
+    # filename = os.path.join(opt.results_dir, opt.name, 'random_label.txt')
     for i, data in enumerate(dataset):
         if i >= opt.how_many:
             break
-        model.set_input(data, 0,0)
+        # randomnum = np.random.random()
+        randomnum = 1
+        model.set_input(data,randomnum, 0)
         model.test()
         visuals = model.get_current_visuals()
         img_path = model.get_image_paths()
         print('%04d: process image... %s' % (i, img_path))
-        visualizer.save_images(webpage, visuals, img_path, aspect_ratio=opt.aspect_ratio)
+        # fp = open(filename,'a+')
+        # fp.write(str(img_path)+"        "+"random_label:"+str(randomnum)+'\n')
+        # fp.close()
+        visualizer.save_images_withlabel(webpage, visuals, img_path, aspect_ratio=opt.aspect_ratio)
 
     webpage.save()

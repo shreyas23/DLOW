@@ -3,6 +3,7 @@ from options.train_options import TrainOptions
 from data import CreateDataLoader
 from models import create_model
 from util.visualizer import Visualizer
+import math
 
 if __name__ == '__main__':
     opt = TrainOptions().parse()
@@ -14,32 +15,50 @@ if __name__ == '__main__':
     model = create_model(opt)
     visualizer = Visualizer(opt)
     total_steps = 0
+    total_steps = (opt.epoch_count-1)*dataset_size
 
-    for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
+#    for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
+    for epoch in range(opt.epoch_count, opt.progressive_epoch):
         epoch_start_time = time.time()
         iter_data_time = time.time()
         epoch_iter = 0
 
         for i, data in enumerate(dataset):
             iter_start_time = time.time()
+            t_data = iter_start_time - iter_data_time
             if total_steps % opt.print_freq == 0:
                 t_data = iter_start_time - iter_data_time
             visualizer.reset()
+            # if total_steps % 5 == 0:
+            #    sign = '0'
+            #elif total_steps % 5 == 1:
+            #    sign = '1'
+            #elif total_steps % 5 == 2:
+            #    sign = '2'
+            #elif total_steps % 5 == 3:
+            #    sign = '3'
+            #elif total_steps % 5 == 4:
+            #    sign = '4'
+            #else:
+            #    print("Error occur when getting the 0, 1, 0to1")
+            # interval = int((opt.progressive_epoch-1)/11);
+            # print("interval:", interval)
             if total_steps % 5 == 0:
-                sign = '0'
+                sign = '1'
             elif total_steps % 5 == 1:
                 sign = '1'
             elif total_steps % 5 == 2:
-                sign = '2'
+                sign = '1'
             elif total_steps % 5 == 3:
-                sign = '3'
+                sign = '1'
             elif total_steps % 5 == 4:
-                sign = '4'
-            else:
-                print("Error occur when getting the 0, 1, 0to1")
+                sign = '2' 
+            beta = 1
+            # alpha = math.exp((epoch-1.0/2.0*opt.progressive_epoch)/(1.0/4.0*opt.progressive_epoch))
+            alpha = math.exp((total_steps-1.0/2.0*(opt.progressive_epoch-1)*dataset_size)/(1.0/4.0*(opt.progressive_epoch-1)*dataset_size))
             total_steps += opt.batchSize
             epoch_iter += opt.batchSize
-            model.set_input(data, sign)
+            model.set_input(data, beta, alpha, sign)
             model.optimize_parameters()
 
             if total_steps % opt.display_freq == 0:
